@@ -3,33 +3,51 @@ package com.example.evilk.myapplication.model
 import com.example.evilk.myapplication.presenters.MainPresenter
 import java.util.*
 import android.os.Handler
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.result.Result
+import com.github.kittinunf.result.getAs
+import com.github.salomonbrys.kotson.fromJson
 import com.google.gson.Gson
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import java.net.HttpURLConnection
 import java.net.URL
 
 /**
  * Created by evilk on 02.11.2016.
  */
 
-class HeatingModel{
-    fun GetCurrentTemperatureValue(presenterCallback:MainPresenter){
-        Handler().postDelayed({
-            var rnd = Random();
-            var rangeMin = 0
-            var rangeMax = 40
-            var newValue = rangeMin + (rangeMax - rangeMin) * rnd.nextInt(rangeMax - rangeMin)+rangeMin
-            presenterCallback.updateTemperatureValue(newValue)
-        }, 2000)
+class HeatingAction{
+    var action:String? = null
+}
 
-//        doAsync {
-//            val url = URL("http://jsonplaceholder.typicode.com/posts/1")
-//            val json = url.readText()
-//            val gson = Gson()
-//            val person = gson.fromJson<Person>(json)
-//            uiThread{
-//                presenterCallback.updateTemperatureValue()
-//            }
- //       }
+class  HeatingActionResult{
+    var result:String? = null
+}
+
+class HeatingModel{
+    var gson = Gson()
+
+    fun GetCurrentTemperatureValue(presenterCallback:MainPresenter){
+        var action = HeatingAction()
+        action.action = "GetTemperature"
+        var content = gson.toJson(action)
+        FuelManager.instance.baseHeaders = mapOf("Content-Type" to "application/json")
+        Fuel.post("http://smart.nazaryev.ru").body(content).responseString{request, response, result->
+            when(result){
+                is Result.Failure->{
+                }
+                is Result.Success->{
+                    onActionSuccess(result.get(), presenterCallback)
+                }
+            }
+        }
+    }
+
+    fun onActionSuccess(result:String, presenterCallback:MainPresenter){
+        var data = gson.fromJson<HeatingActionResult>(result)
+        var temperature = data.result?.toInt()?:-1
+        presenterCallback.updateTemperatureValue(temperature)
     }
 }

@@ -9,13 +9,11 @@ import com.example.evilk.myapplication.view.MainView
 class MainPresenterImpl(val heatingModel:HeatingModel, val mainView:MainView): MainPresenter{
 
     override fun refreshTemperatureValue() {
-        mainView.showProgressBar()
         var temperature = heatingModel.GetCurrentTemperatureValue(this)
     }
 
     override fun updateTemperatureValue(temperature:Int) {
         mainView.updateTemperatureValue(temperature)
-        mainView.hideProgressBar()
     }
 
     override fun changeBatteryCondition(currentState:String) {

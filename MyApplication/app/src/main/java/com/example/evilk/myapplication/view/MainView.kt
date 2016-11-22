@@ -6,7 +6,4 @@ package com.example.evilk.myapplication.view
 
 interface  MainView{
     fun updateTemperatureValue(newValue: Int)
-    fun hideProgressBar()
-    fun showProgressBar()
-    fun changeBatteryCondition(newValue: String)
 }
